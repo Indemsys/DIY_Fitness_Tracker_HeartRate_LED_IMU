@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en"><!-- InstanceBegin template="/Templates/main_template.dwt" codeOutsideHTMLIsLocked="false" -->
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- InstanceBeginEditable name="doctitle" -->
+    <title>Communication Module State</title>
+    <!-- InstanceEndEditable -->
+    <link href="Styles.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="GenScript.js"></script>
+
+  <!-- InstanceBeginEditable name="head" -->
+	  
+	  
+  <!-- InstanceEndEditable -->
+  </head>
+	
+  <body>
+    <div id="Main_menu" class="menu" style="left: 0;">
+      <a href="javascript:void(0)" class="closebtn" onclick="closeMenu()">&times;</a>
+      <a href="index.html">Home</a>
+      <a href="Sys_state.html">Communication module state</a>
+      <a href="ModParams.html">Communication module parameters</a>
+      <a href="Upload.html">Firmware upload</a>
+      <a href="Time_Sync.html">Time synchronization</a>
+      <a href="WiFi_scan.html">Scanning WiFi access points</a>
+      <a href="Logs.html">Communication Log</a>
+      <a href="#" onclick="Reset_device()">Reset device</a>
+    </div>
+
+    <header>
+      <div class="header_panel">
+        <button id="open_btn" class="cmd_btn" onclick="Open_menu()">&#9776; Menu</button>
+        <div style="display:flex; flex-direction:row; place-content: flex-end; flex: auto;">  
+        <!-- InstanceBeginEditable name="HeaderRegion" -->
+      <div style="align-content: center;flex-grow: inherit; text-align: left; padding-left: 10px">Communication Module State</div>
+      
+      <!-- InstanceEndEditable -->
+        </div>  
+      </div>  
+    </header>
+    
+    <div class="content">	 
+  <!-- InstanceBeginEditable name="body" -->
+    
+    <div class="panel">
+      <div class="grid">
+          <div class="itemc">Product name</div><div class="itemv" id="ProductName">Loading...</div>
+          <div class="itemc">Hardware Version</div><div class="itemv" id="HW_ver"> Loading...</div>
+          <div class="itemc">Firmware Verson</div><div class="itemv" id="CompileDateTime">Loading...</div>
+          <div class="itemc">Bootloader Version</div><div class="itemv" id="BootloaderVer">Loading...</div>
+          <div class="itemc">CPU ID</div><div class="itemv" id="CPU_ID">           Loading...</div>
+      </div>
+   </div>
+
+    <div class="panel">
+      <div class="grid">
+          <div class="itemc">Up time</div><div class="itemv" id="up_time">         Loading...</div>
+          <div class="itemc">CPU load level</div><div class="itemv" id="cpu_usage">Loading...</div>
+          <div class="itemc">Device time</div><div class="itemv" id="local_time">  Loading...</div>
+          <div class="itemc">RAM free space</div><div class="itemv" id="ram_free">Loading...</div>
+          <div class="itemc">SDRAM free space</div><div class="itemv" id="sdram_free">Loading...</div>
+      </div>
+    </div>
+  
+    <div class="panel">
+        <div class="grid">
+          <div class="itemc">Internet connection</div><div class="itemv" id="has_intenet_connection">   Loading...</div>
+      </div>
+    </div>
+    <div class="panel">
+        <div class="grid">
+          <div class="itemc" style ="grid-column: span 2; text-align: center;color: #bd0606;">Device WiFi Access Point </div>
+          <div class="itemc">IP address</div><div class="itemv" id="ap_ip_address">   Loading...</div>
+          <div class="itemc">MAC adress</div><div class="itemv" id="ap_mac_address"> Loading...</div>
+          <div class="itemc">Remote MAC address</div><div class="itemv" id="ap_rem_mac_address"> Loading...</div>
+      </div>
+    </div>
+    <div class="panel">
+        <div class="grid">
+          <div class="itemc" style ="grid-column: span 2;text-align: center;color: #bd0606;">Device WiFi Station </div>
+          <div class="itemc">IP address</div><div class="itemv" id="sta_ip_address">   Loading...</div>
+          <div class="itemc">MAC adress</div><div class="itemv" id="sta_mac_address"> Loading...</div>
+          <div class="itemc">Remote MAC address</div><div class="itemv" id="sta_rem_mac_address"> Loading...</div>
+          <div class="itemc">AP SSID</div><div class="itemv" id="sta_ssid"> Loading...</div>
+          <div class="itemc">RSSI</div><div class="itemv" id="sta_rssi"> Loading...</div>
+      </div>
+    </div>
+    <div class="panel">
+        <div class="grid">
+          <div class="itemc" style ="grid-column: span 2;text-align: center;color: #bd0606;">Device USB-Ethernet </div>
+          <div class="itemc">Type</div><div class="itemv" id="usb_ip_type">   Loading...</div>
+          <div class="itemc">IP adress</div><div class="itemv" id="usb_ip_address"> Loading...</div>
+          <div class="itemc">MAC address</div><div class="itemv" id="usb_mac_address"> Loading...</div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="grid">
+          <div class="itemc">Gateway IP address</div><div class="itemv" id="gateway_ip_address">   Loading...</div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="grid">
+          <div class="itemc">Reboot counter</div>           <div class="itemv" id="reboot_cnt">       Loading...</div>
+          <div class="itemc">Total Up time</div>            <div class="itemv" id="total_work_time">  Loading...</div>
+          <div class="itemc">SD card file system state</div><div class="itemv" id="sd_card_fs_state"> Loading...</div>
+      </div>
+    </div>
+	 
+	  
+  <!-- InstanceEndEditable -->
+    </div> 
+	  
+  <footer>
+    <div class="footer_panel">
+      <p style="margin: 2px;" id="footer_text">---</p>
+    </div>  
+  </footer>
+<!-- InstanceBeginEditable name="script" -->
+    <script>
+      async function Post_device_status()
+      {
+        try
+        {
+          const response = await fetch('post_status', {method: 'POST'});
+          const data = await response.json();
+
+          let totalSeconds = data.up_time;
+          let t = convertSeconds(totalSeconds);
+          ui('up_time' , `${t.days} d. ${t.hours} h. ${t.minutes} min. ${t.seconds} sec.` );          
+          
+          
+          ui('cpu_usage',data.cpu_usage + " %");
+          ui('local_time',data.local_time);
+
+          ui('ap_ip_address',data.ap_ip_address);
+          ui('ap_mac_address',data.ap_mac_address);
+          ui('ap_rem_mac_address',data.ap_rem_mac_address);
+
+          ui('sta_ip_address',data.sta_ip_address);
+          ui('sta_mac_address',data.sta_mac_address);
+          ui('sta_rem_mac_address',data.sta_rem_mac_address);
+          ui('sta_ssid',data.sta_ssid);
+          ui('sta_rssi', data.sta_rssi + " dBm");
+
+          ui('usb_ip_type',data.usb_ip_type);
+          ui('usb_ip_address',data.usb_ip_address);
+          ui('usb_mac_address',data.usb_mac_address);
+
+          ui('gateway_ip_address',data.gateway_ip_address);
+
+          ui('ram_free',data.ram_free + " bytes");
+          ui('sdram_free',data.sdram_free + " bytes");
+			
+          if (data.sd_card_fs_state === 1)
+          {
+            document.getElementById('sd_card_fs_state').innerText = 'Operational';
+          }
+          else
+          {
+            document.getElementById('sd_card_fs_state').innerText = 'Non-operational';
+          }
+
+          if (data.has_intenet_connection === 1)
+          {
+            document.getElementById('has_intenet_connection').innerText = 'Online';
+          }
+          else
+          {
+            document.getElementById('has_intenet_connection').innerText = 'Offline';
+          }
+			
+          let totalWorkSeconds = data.total_up_time;
+          let tt = convertSeconds(totalWorkSeconds);
+          ui('total_work_time', `${tt.days} d. ${tt.hours} h. ${tt.minutes} min. ${tt.seconds} sec.`  )
+
+        } catch (error)
+        {
+          console.error('Error fetching data:', error);
+        }
+      }
+
+      function Fill_Fields()
+      {
+        ui('ProductName',productName);
+        ui('HW_ver',HW_ver);
+        ui('CompileDateTime',CompDate + " " + CompTime);
+        ui('BootloaderVer', BootloaderVer);
+        ui('CPU_ID',insertSpaceEveryEightChars(CPU_ID));
+        ui('reboot_cnt', RebootCnt);
+      };
+      Fields_filler = Fill_Fields;
+      Post_device_status();
+      setInterval(Post_device_status, 1000);
+
+    </script>
+<!-- InstanceEndEditable -->
+  <script>
+      // Событие перед закрытием или обновлением страницы
+      window.addEventListener('beforeunload', function() {localStorage.removeItem('deviceData');});
+      window.onload = Check_And_Load_Data;
+    </script>
+  </body>
+<!-- InstanceEnd --></html>

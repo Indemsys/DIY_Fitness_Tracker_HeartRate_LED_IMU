@@ -1,0 +1,19 @@
+C:\iar\ewarm-9.60.3\arm\bin\armPROC.dll
+
+ C:\iar\ewarm-9.60.3\arm\bin\armJLINK.dll
+
+ D:\Embedded\Projects\OpenSource\DIY_Fitness_Tracker_HeartRate_LED_IMU\Out\FTHRLI\Exe\S7V30_FTHRLI.out
+
+ --plugin=C:\iar\ewarm-9.60.3\arm\bin\armLibSupportUniversal.dll
+
+ --device_macro=C:\iar\ewarm-9.60.3\arm/config/debugger/Renesas/R7FS_OCDID.dmac
+
+ --device_macro=C:\iar\ewarm-9.60.3\arm/config/debugger/Renesas/R7FS7_CLOCK.dmac
+
+ --device_macro=C:\iar\ewarm-9.60.3\arm/config/debugger/Renesas/R7FS_QSPI.dmac
+
+ --device_macro=C:\iar\ewarm-9.60.3\arm/config/debugger/Renesas/R7FS7G2.dmac
+
+ 
+
+

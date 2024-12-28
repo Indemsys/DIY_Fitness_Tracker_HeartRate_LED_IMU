@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en"><!-- InstanceBegin template="/Templates/main_template.dwt" codeOutsideHTMLIsLocked="false" -->
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>S7V30</title>
+    <link href="AppStyles.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="AppGenScript.js"></script>
+
+  <style>
+.grid1 {
+  display: grid;
+  grid-template-columns: 4fr 1fr;
+  gap: 1px; /* Отступы между элементами сетки */
+}
+.grid1 > div {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05); /* Light gray color with low opacity */
+  padding: 2px; /* Optional: to add some spacing inside each grid item */
+}
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px; /* Отступы между элементами сетки */
+}
+.grid2 > div {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05); /* Light gray color with low opacity */
+  padding: 2px; /* Optional: to add some spacing inside each grid item */
+}
+.itemc1 {
+  font-size: 0.8em;
+  color: #1e3a8a;
+}
+/* Сетка 2x2 для кнопок */
+.button-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-gap: 0px;
+  max-width: 800px;
+  margin: auto;
+}
+.sendButton 
+{
+  flex-grow: 0;
+  font-size: 16px;
+  background-color: #1e3a8a;
+  color: white;
+  padding: 30px 12px 30px 12px;
+  margin: 2px 5px 2px 5px;
+  border: none;
+  z-index: 1;
+  border-radius: 10px;  
+  user-select: none;
+  cursor: pointer;
+}
+.grid_capt {
+    grid-column: span 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    color: #bd0606;
+}
+.capt-text {
+    flex-grow: 1;
+    text-align: center;
+}
+.active_btn
+{
+    background-color: red;
+    color: white;
+}
+
+.small-reset-btn {
+    position: absolute;
+    right: 0;
+    font-size: 12px;
+    padding: 0px 2px;
+    margin-right: 10px;
+    cursor: pointer;
+}
+.summary_capt {
+    justify-content: center;
+    position: relative;
+    color: #bd0606;
+}
+</style>  
+    
+  </head>
+	
+  <body>
+    <div id="Main_menu" class="menu" style="left: 0;">
+      <a href="javascript:void(0)" class="closebtn" onclick="closeMenu()">&times;</a>
+      <a href="index.html">Home</a>
+      <a href="AppParams.html">Application Parameters</a>
+      <a href="AppLog.html">Log Viewer</a>
+      <a href="Sys_state.html">Communications</a>
+      <a href="javascript:void(0)" onclick='sendPostRequest("{\"command\":\"goto_sleep\", \"arg\":0}")'>Go to Sleep</a>
+    </div>
+
+    <header>
+      <div class="header_panel">
+        <button id="open_btn" class="cmd_btn" onclick="Open_menu()">&#9776; Menu</button>
+        <div style="display:flex; flex-direction:row; place-content: flex-end; flex: auto;">  
+        <div style="align-content: center;flex-grow: inherit; text-align: center; padding-left: 10px"> S7V30 </div>
+      
+        </div>
+      </div>  
+    </header>
+    
+    <div class="content">	 
+      <div class="panel">
+        <div class="grid">
+          <div class="itemc">Up time                 </div><div class="itemv" id="up_time"             > Loading...</div>
+          <div class="itemc">IMU recorded file size  </div><div class="itemv" id="imu_rec_file_size"             > Loading...</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="grid">
+          <div class="itemc">Accum connected          </div><div class="itemv" id="no_accum"             > Loading...</div>
+          <div class="itemc">Charger state            </div><div class="itemv" id="charger_state_str"    > Loading...</div>
+          <div class="itemc">Accumulator voltage (V)  </div><div class="itemv" id="accum_voltage"        > Loading...</div>
+          <div class="itemc">Accumulator current (mA) </div><div class="itemv" id="accum_current"        > Loading...</div>
+          <div class="itemc">Accumulator capacity (%) </div><div class="itemv" id="accum_capacity"       > Loading...</div>
+          <div class="itemc">PCB temperature (C)      </div><div class="itemv" id="pcb_temp"             > Loading...</div>
+        </div>
+      </div>
+
+    </div>
+
+
+  <footer>
+    <div class="footer_panel">
+      <div class="button-container">
+          <button id="CMD_start_imu_recording"  class="sendButton" data-message='{"command":"start_imu_rec", "arg":0}' >Start recording  </button>
+          <button id="CMD_stop_imu_recording"   class="sendButton" data-message='{"command":"stop_imu_rec", "arg":0}'  >Stop recording   </button>
+      </div>
+    </div>
+  </footer>
+    <script>
+
+      async function Request_device_status()
+      {
+        try
+        {
+          const response = await fetch('post_get_app_status', {method: 'POST'});
+          const data = await response.json();
+
+          // For each element with class 'itemv'
+          let items = document.getElementsByClassName('itemv');
+          for (let item of items)
+          {
+            let id = item.id;
+            if (id in data)
+            {
+              if (id.startsWith("ESC_"))
+              {
+                ESC_syg_state(id, data[id]);
+              }
+              else if (id === 'up_time')
+              {
+                let totalSeconds = data.up_time;
+                let t = convertSeconds(totalSeconds);
+                item.textContent = `${t.days} d. ${t.hours} h. ${t.minutes} min. ${t.seconds} sec.`;
+              }
+              else if (id === 'total_up_time')
+              {
+                let totalSeconds = data.total_up_time;
+                let t = convertSeconds(totalSeconds);
+                item.textContent = `${t.days} d. ${t.hours} h. ${t.minutes} min. ${t.seconds} sec.`;
+              }
+              else if  (id.startsWith("btn_"))
+              {
+                item.textContent = data[id];
+                Set_active_class(data[id],  id);
+              }
+              else
+              {
+                item.textContent = data[id];
+              }
+            }
+          }
+          items = document.getElementsByClassName('sendButton');
+          for (let item of items)
+          {
+            let id = item.id;
+            if (id in data)
+            {
+              if (id.startsWith("CMD_"))
+              {
+                Set_active_class(data[id],  id);
+              }
+            }
+          }
+
+
+        } catch (error)
+        {
+          console.error('Error fetching data:', error);
+        }
+      }
+
+      // ----------------------------------------------------------------------------
+      //  Function indicating the status of the signal in the safety circuit.
+      // ----------------------------------------------------------------------------
+      function ESC_syg_state(divId, arg)
+      {
+        // Находим div элемент по id
+        const div = document.getElementById(divId);
+
+        // Проверяем существование div
+        if (!div)
+        {
+          console.error("Div с указанным id не найден.");
+          return;
+        }
+
+        let text;
+        let color;
+
+        // Logic for selecting text and color
+        if (arg === -1)
+        {
+          text = "Undefined";
+          color = "#d7d7d7";
+        } else if (arg === 0)
+        {
+          text = "Closed";
+          color = "green";
+          div.style.fontWeight = "bold";
+        } else if (arg === 1)
+        {
+          text = "Opened";
+          color = "red";
+          div.style.fontWeight = "bold";
+        } else
+        {
+          text = "Invalid";
+          color = "yellow";
+        }
+
+        // Устанавливаем текст и цвет div
+        div.textContent = text;
+        div.style.color = color;
+      }
+
+      // ----------------------------------------------------------------------------
+      //  Function for changing the visual representation class for control buttons
+      // ----------------------------------------------------------------------------
+      function Set_active_class(val, element_id)
+      {
+        if (val)
+        {
+          document.getElementById(element_id).classList.add('active_btn');
+        }
+        else
+        {
+          document.getElementById(element_id).classList.remove('active_btn');
+        }
+      }
+
+      // ----------------------------------------------------------------------------
+      //  Function for changing the visual representation class for control buttons
+      // ----------------------------------------------------------------------------
+      function handleResetClick()
+      {
+        const userCode = prompt('Enter the control code to reset the counters:');
+        const correctCode = "1234567890";
+        if (userCode === correctCode)
+        {
+          sendPostRequest('{"command":"reset_nv_counters", "arg":0}');
+        }
+        else
+        {
+          alert('Invalid control code. Counters were not reset.');
+        }
+      }
+
+      function Check_And_Load_Data()
+      {
+      }
+
+      // Функция для отправки POST-запроса
+      function sendPostRequest(message)
+      {
+        fetch('post_app_command',
+        {
+          method: 'POST',
+          headers:
+          {
+            'Content-Type': 'application/json',
+          },
+          body: message
+        });
+      }
+
+
+      // ----------------------------------------------------------------------------
+      // Function for handling button click
+      // ----------------------------------------------------------------------------
+      function handleMouseDown(event)
+      {
+        event.preventDefault(); // Предотвращаем дальнейшее выполнение стандартного события
+        const message = event.target.getAttribute('data-message');
+        sendPostRequest(message);
+      }
+
+      // ----------------------------------------------------------------------------
+      // Функция для остановки отправки запросов
+      // ----------------------------------------------------------------------------
+      function stopSendingRequests()
+      {
+      }
+      // Assigning event handlers to all buttons with the class "sendButton".
+      document.querySelectorAll('.sendButton').forEach(button =>
+      {
+        button.addEventListener('mousedown', handleMouseDown);
+        button.addEventListener('mouseup', stopSendingRequests);
+        button.addEventListener('mouseleave', stopSendingRequests);
+        // Добавляем сенсорные события для мобильных устройств
+        button.addEventListener('touchstart', handleMouseDown); // Для сенсорных экранов
+        button.addEventListener('touchend', stopSendingRequests);    // Для сенсорных экранов
+      });
+
+
+      Request_device_status();
+      setInterval(Request_device_status, 500);
+
+    </script>
+  </body>
+</html>
